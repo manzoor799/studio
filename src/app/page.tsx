@@ -55,7 +55,44 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
+    try {
+      const savedPlan = localStorage.getItem('studyPlan');
+      if (savedPlan) {
+        setStudyPlan(JSON.parse(savedPlan));
+      }
+      const savedLog = localStorage.getItem('sessionLog');
+      if (savedLog) {
+        setSessionLog(JSON.parse(savedLog));
+      }
+    } catch (error) {
+      console.error("Failed to load data from localStorage", error);
+    }
   }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      try {
+        if (studyPlan) {
+          localStorage.setItem('studyPlan', JSON.stringify(studyPlan));
+        } else {
+          localStorage.removeItem('studyPlan');
+        }
+      } catch (error) {
+        console.error("Failed to save study plan to localStorage", error);
+      }
+    }
+  }, [studyPlan, isClient]);
+
+  useEffect(() => {
+    if (isClient) {
+      try {
+        localStorage.setItem('sessionLog', JSON.stringify(sessionLog));
+      } catch (error) {
+        console.error("Failed to save session log to localStorage", error);
+      }
+    }
+  }, [sessionLog, isClient]);
+
 
   const quickTaskForm = useForm<z.infer<typeof quickTaskSchema>>({
     resolver: zodResolver(quickTaskSchema),
