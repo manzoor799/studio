@@ -19,6 +19,7 @@ import { Slider } from "@/components/ui/slider";
 
 import { Timer } from "@/components/timer";
 import { StudyPlanGenerator } from "@/components/study-plan-generator";
+import { Chatbot } from "@/components/chatbot";
 import { Logo } from "@/components/icons";
 import { BookOpen, History, ListTodo, Play, Plus, Trash2, Pencil, Check as CheckIcon, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -408,6 +409,11 @@ export default function Home() {
             </Tabs>
           </div>
         </main>
+        
+        <div className="mt-8">
+            <Chatbot />
+        </div>
+
         <footer className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
           <p>
             Developed by Manzoor | Visit <a href="https://manzoorseo.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">manzoorseo.com</a>
