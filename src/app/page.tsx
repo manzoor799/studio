@@ -20,7 +20,7 @@ import { Slider } from "@/components/ui/slider";
 import { Timer } from "@/components/timer";
 import { StudyPlanGenerator } from "@/components/study-plan-generator";
 import { Logo } from "@/components/icons";
-import { BookOpen, History, ListTodo, Play, Plus, Trash2, Pencil, Check as CheckIcon } from "lucide-react";
+import { BookOpen, History, ListTodo, Play, Plus, Trash2, Pencil, Check as CheckIcon, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Task = {
@@ -230,6 +230,22 @@ export default function Home() {
     });
   };
 
+  const handleResetData = () => {
+    if (studyPlan) {
+        studyPlan.forEach(task => {
+            localStorage.removeItem(`timerState_${task.id}`);
+        });
+    }
+    setStudyPlan(null);
+    setCurrentTask(null);
+    localStorage.removeItem('studyPlan');
+    localStorage.removeItem('currentTaskId');
+    toast({
+        title: "Study Plan Reset",
+        description: "Your study plan has been cleared.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
@@ -255,7 +271,13 @@ export default function Home() {
                 {studyPlan && (
                   <Card className="mt-4">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2"><ListTodo /> Your Study Plan</CardTitle>
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="flex items-center gap-2"><ListTodo /> Your Study Plan</CardTitle>
+                        <Button variant="ghost" size="sm" onClick={handleResetData}>
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Reset Data
+                        </Button>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <ScrollArea className="h-72">
@@ -395,5 +417,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
