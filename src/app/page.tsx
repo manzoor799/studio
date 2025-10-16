@@ -255,12 +255,12 @@ export default function Home() {
           <h1 className="text-3xl font-bold tracking-tight">StudyFlow</h1>
         </header>
 
-        <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="lg:order-last space-y-8">
+        <main className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="lg:order-2 flex flex-col gap-8">
             <Timer task={currentTask} onComplete={handleTaskComplete} onSelectTask={handleSelectTask} />
             <Chatbot />
           </div>
-          <div className="w-full lg:order-first">
+          <div className="lg:order-1 w-full">
             <Tabs defaultValue="ai-plan" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="ai-plan"><BookOpen className="w-4 h-4 mr-2" />AI Plan</TabsTrigger>
