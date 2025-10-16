@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,6 +43,11 @@ export default function Home() {
   const [sessionLog, setSessionLog] = useState<LogEntry[]>([]);
   const [isLoadingPlan, setIsLoadingPlan] = useState(false);
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const quickTaskForm = useForm<z.infer<typeof quickTaskSchema>>({
     resolver: zodResolver(quickTaskSchema),
@@ -172,7 +177,7 @@ export default function Home() {
                                   <p className="font-semibold">{entry.subject}</p>
                                   <p className="text-sm text-muted-foreground">{entry.task}</p>
                                 </div>
-                                <p className="text-sm text-muted-foreground">{entry.completedAt}</p>
+                                {isClient && <p className="text-sm text-muted-foreground">{entry.completedAt}</p>}
                               </div>
                               {index < sessionLog.length - 1 && <Separator className="mt-4" />}
                             </div>
