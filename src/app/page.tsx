@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 
 import { Timer } from "@/components/timer";
 import { StudyPlanGenerator } from "@/components/study-plan-generator";
@@ -21,9 +23,11 @@ import { BookOpen, History, ListTodo, Play, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Task = {
+  id: number;
   subject: string;
   duration: number; // in minutes
   task?: string;
+  completed: boolean;
 };
 
 type LogEntry = {
@@ -39,7 +43,7 @@ const quickTaskSchema = z.object({
 
 export default function Home() {
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
-  const [studyPlan, setStudyPlan] = useState<StudyPlanOutput["plan"] | null>(null);
+  const [studyPlan, setStudyPlan] = useState<Task[] | null>(null);
   const [sessionLog, setSessionLog] = useState<LogEntry[]>([]);
   const [isLoadingPlan, setIsLoadingPlan] = useState(false);
   const { toast } = useToast();
@@ -54,6 +58,16 @@ export default function Home() {
     defaultValues: { subject: "", duration: 25 },
   });
 
+  const handlePlanGenerated = (plan: StudyPlanOutput["plan"]) => {
+    const planWithState = plan.map((task, index) => ({
+      ...task,
+      id: index,
+      completed: false,
+    }));
+    setStudyPlan(planWithState);
+    setCurrentTask(null);
+  };
+
   const handleTaskComplete = useCallback(() => {
     if (currentTask) {
       const newLogEntry = {
@@ -62,6 +76,13 @@ export default function Home() {
         completedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setSessionLog(prevLog => [newLogEntry, ...prevLog]);
+      
+      setStudyPlan(prevPlan => 
+        prevPlan ? prevPlan.map(task => 
+          task.id === currentTask.id ? { ...task, completed: true } : task
+        ) : null
+      );
+
       setCurrentTask(null);
       toast({
         title: "Task Completed!",
@@ -71,13 +92,35 @@ export default function Home() {
   }, [currentTask, toast]);
 
   const handleSelectTask = (task: Task) => {
-    setCurrentTask(task);
+    if (!task.completed) {
+      setCurrentTask(task);
+    }
   };
 
   function onQuickTaskSubmit(values: z.infer<typeof quickTaskSchema>) {
-    handleSelectTask({ subject: values.subject, duration: values.duration, task: "Quick Task" });
+    const newQuickTask: Task = {
+      id: Date.now(),
+      subject: values.subject,
+      duration: values.duration,
+      task: "Quick Task",
+      completed: false
+    };
+    // Add to study plan to be displayed in the checklist as well
+    setStudyPlan(prevPlan => [newQuickTask, ...(prevPlan || [])]);
+    handleSelectTask(newQuickTask);
     quickTaskForm.reset();
   }
+
+  const handleDurationChange = (taskId: number, newDuration: number) => {
+    setStudyPlan(prevPlan => 
+      prevPlan ? prevPlan.map(task =>
+        task.id === taskId ? { ...task, duration: newDuration } : task
+      ) : null
+    );
+    if (currentTask && currentTask.id === taskId) {
+      setCurrentTask(prev => prev ? { ...prev, duration: newDuration } : null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -97,7 +140,7 @@ export default function Home() {
               </TabsList>
 
               <TabsContent value="ai-plan">
-                <StudyPlanGenerator onPlanGenerated={setStudyPlan} isLoading={isLoadingPlan} setIsLoading={setIsLoadingPlan} />
+                <StudyPlanGenerator onPlanGenerated={handlePlanGenerated} isLoading={isLoadingPlan} setIsLoading={setIsLoadingPlan} />
                 {studyPlan && (
                   <Card className="mt-4">
                     <CardHeader>
@@ -106,15 +149,31 @@ export default function Home() {
                     <CardContent>
                       <ScrollArea className="h-64">
                         <div className="space-y-4">
-                          {studyPlan.map((item, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-accent/50 rounded-lg">
-                              <div>
-                                <p className="font-semibold">{item.subject} <span className="text-sm font-normal text-muted-foreground">({item.duration} min)</span></p>
-                                <p className="text-sm text-muted-foreground">{item.task}</p>
+                          {studyPlan.map((item) => (
+                            <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${item.completed ? 'bg-accent/30' : 'bg-accent/50'}`}>
+                              <div className="flex items-start gap-4">
+                                <Checkbox checked={item.completed} className="mt-1" onCheckedChange={() => handleSelectTask(item)} disabled={item.completed} />
+                                <div className="flex-grow">
+                                  <p className={`font-semibold ${item.completed ? 'line-through text-muted-foreground' : ''}`}>{item.subject}</p>
+                                  <p className="text-sm text-muted-foreground">{item.task}</p>
+                                </div>
                               </div>
-                              <Button size="sm" variant="ghost" onClick={() => handleSelectTask(item)}>
-                                <Play className="w-4 h-4 mr-2" /> Start
-                              </Button>
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 w-32">
+                                  <Slider
+                                    defaultValue={[item.duration]}
+                                    max={120}
+                                    step={5}
+                                    onValueChange={([value]) => handleDurationChange(item.id, value)}
+                                    disabled={item.completed}
+                                    className="w-full"
+                                  />
+                                  <span className="text-sm font-normal text-muted-foreground w-12 text-right">{item.duration}m</span>
+                                </div>
+                                <Button size="sm" variant="ghost" onClick={() => handleSelectTask(item)} disabled={item.completed}>
+                                  <Play className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -199,3 +258,4 @@ export default function Home() {
     </div>
   );
 }
+    
