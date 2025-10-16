@@ -131,6 +131,9 @@ export default function Home() {
         </header>
 
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="flex justify-center items-start">
+            <Timer task={currentTask} onComplete={handleTaskComplete} onSelectTask={handleSelectTask} />
+          </div>
           <div className="w-full">
             <Tabs defaultValue="ai-plan" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
@@ -249,9 +252,6 @@ export default function Home() {
                 </Card>
               </TabsContent>
             </Tabs>
-          </div>
-          <div className="flex justify-center items-start">
-            <Timer task={currentTask} onComplete={handleTaskComplete} onSelectTask={handleSelectTask} />
           </div>
         </main>
       </div>
