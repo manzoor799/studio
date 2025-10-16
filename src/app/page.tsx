@@ -256,8 +256,9 @@ export default function Home() {
         </header>
 
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="lg:order-last">
+          <div className="lg:order-last space-y-8">
             <Timer task={currentTask} onComplete={handleTaskComplete} onSelectTask={handleSelectTask} />
+            <Chatbot />
           </div>
           <div className="w-full lg:order-first">
             <Tabs defaultValue="ai-plan" className="w-full">
@@ -410,10 +411,6 @@ export default function Home() {
           </div>
         </main>
         
-        <div className="mt-8">
-            <Chatbot />
-        </div>
-
         <footer className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
           <p>
             Developed by Manzoor | Visit <a href="https://manzoorseo.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">manzoorseo.com</a>
