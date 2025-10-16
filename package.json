@@ -1,7 +1,8 @@
 {
-  "name": "nextn",
+  "name": "studyflow",
   "version": "0.1.0",
   "private": true,
+  "description": "A modern and minimalist timer app for your studies.",
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
