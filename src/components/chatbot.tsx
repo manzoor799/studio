@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -77,7 +78,7 @@ export function Chatbot() {
         <CardDescription>Ask any question about your subjects, and I'll help you out!</CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-64 pr-4" ref={scrollAreaRef}>
+        <ScrollArea className="h-48 pr-4" ref={scrollAreaRef}>
           <div className="space-y-6">
             {messages.map((message, index) => (
               <div key={index} className={cn("flex items-start gap-3", message.role === 'user' ? 'justify-end' : 'justify-start')}>
