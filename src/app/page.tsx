@@ -285,7 +285,7 @@ export default function Home() {
                       <ScrollArea className="h-72">
                         <div className="space-y-4">
                           {studyPlan.map((item) => (
-                            <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${item.completed ? 'bg-accent/30' : 'bg-accent/50 hover:bg-accent/60'}`}>
+                            <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${item.completed ? 'bg-accent/30' : 'bg-accent/40 hover:bg-accent/50'}`}>
                               <div className="flex items-start gap-4 flex-grow">
                                 <Checkbox checked={item.completed} className="mt-1" onCheckedChange={() => handleSelectTask(item)} disabled={item.completed} />
                                 <div className="flex-grow">
