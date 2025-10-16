@@ -57,13 +57,26 @@ export default function Home() {
     setIsClient(true);
     try {
       const savedPlan = localStorage.getItem('studyPlan');
-      if (savedPlan) {
-        setStudyPlan(JSON.parse(savedPlan));
-      }
       const savedLog = localStorage.getItem('sessionLog');
+      const savedCurrentTaskId = localStorage.getItem('currentTaskId');
+
+      let loadedPlan: Task[] | null = null;
+      if (savedPlan) {
+        loadedPlan = JSON.parse(savedPlan);
+        setStudyPlan(loadedPlan);
+      }
       if (savedLog) {
         setSessionLog(JSON.parse(savedLog));
       }
+      
+      if (savedCurrentTaskId && loadedPlan) {
+        const taskId = parseInt(savedCurrentTaskId, 10);
+        const task = loadedPlan.find(t => t.id === taskId);
+        if (task) {
+          setCurrentTask(task);
+        }
+      }
+
     } catch (error) {
       console.error("Failed to load data from localStorage", error);
     }
@@ -92,6 +105,20 @@ export default function Home() {
       }
     }
   }, [sessionLog, isClient]);
+
+  useEffect(() => {
+    if (isClient) {
+      try {
+        if (currentTask) {
+          localStorage.setItem('currentTaskId', String(currentTask.id));
+        } else {
+          localStorage.removeItem('currentTaskId');
+        }
+      } catch (error) {
+        console.error("Failed to save current task to localStorage", error);
+      }
+    }
+  }, [currentTask, isClient]);
 
 
   const quickTaskForm = useForm<z.infer<typeof quickTaskSchema>>({
@@ -123,6 +150,10 @@ export default function Home() {
           task.id === currentTask.id ? { ...task, completed: true } : task
         ) : null
       );
+      
+      if (isClient) {
+        localStorage.removeItem(`timerState_${currentTask.id}`);
+      }
 
       setCurrentTask(null);
       toast({
@@ -130,7 +161,7 @@ export default function Home() {
         description: `Great job on finishing "${currentTask.subject}".`,
       });
     }
-  }, [currentTask, toast]);
+  }, [currentTask, toast, isClient]);
 
   const handleSelectTask = (task: Task) => {
     if (!task.completed) {
@@ -167,6 +198,9 @@ export default function Home() {
     setStudyPlan(prevPlan => prevPlan ? prevPlan.filter(task => task.id !== taskId) : null);
     if (currentTask && currentTask.id === taskId) {
       setCurrentTask(null);
+      if(isClient) {
+        localStorage.removeItem(`timerState_${taskId}`);
+      }
     }
     toast({
       title: "Task Removed",
@@ -361,3 +395,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

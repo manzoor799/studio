@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Play, Pause, RotateCw, Forward } from 'lucide-react';
 
 type Task = {
+  id: number;
   subject: string;
   duration: number; // in minutes
   task?: string;
@@ -21,13 +23,53 @@ const formatTime = (seconds: number): string => {
 export function Timer({ task, onComplete, onSelectTask }: { task: Task | null; onComplete: () => void; onSelectTask: (task: Task) => void }) {
     const [timeLeft, setTimeLeft] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
     
     const initialDurationSeconds = useMemo(() => (task ? task.duration * 60 : 0), [task]);
 
     useEffect(() => {
-        setTimeLeft(initialDurationSeconds);
-        setIsRunning(false);
-    }, [initialDurationSeconds]);
+        if (isClient && task) {
+            try {
+                const savedState = localStorage.getItem(`timerState_${task.id}`);
+                if (savedState) {
+                    const { timeLeft: savedTimeLeft, isRunning: savedIsRunning } = JSON.parse(savedState);
+                    // only restore if it makes sense (e.g. not completed)
+                    if (savedTimeLeft > 0) {
+                      setTimeLeft(savedTimeLeft);
+                      setIsRunning(savedIsRunning);
+                    } else {
+                      setTimeLeft(initialDurationSeconds);
+                      setIsRunning(false);
+                    }
+                } else {
+                    setTimeLeft(initialDurationSeconds);
+                    setIsRunning(false);
+                }
+            } catch (error) {
+                console.error("Failed to load timer state from localStorage", error);
+                setTimeLeft(initialDurationSeconds);
+                setIsRunning(false);
+            }
+        } else {
+          setTimeLeft(initialDurationSeconds);
+          setIsRunning(false);
+        }
+    }, [task, initialDurationSeconds, isClient]);
+
+    useEffect(() => {
+        if (isClient && task) {
+            try {
+                const stateToSave = JSON.stringify({ timeLeft, isRunning });
+                localStorage.setItem(`timerState_${task.id}`, stateToSave);
+            } catch (error) {
+                console.error("Failed to save timer state to localStorage", error);
+            }
+        }
+    }, [timeLeft, isRunning, task, isClient]);
 
     useEffect(() => {
         if (!isRunning || timeLeft <= 0) {
@@ -122,3 +164,5 @@ export function Timer({ task, onComplete, onSelectTask }: { task: Task | null; o
         </Card>
     );
 }
+
+    
