@@ -33,11 +33,16 @@ export function Timer({ task, onComplete, onSelectTask }: { task: Task | null; o
 
     useEffect(() => {
         if (isClient && task) {
+            let savedState;
             try {
-                const savedState = localStorage.getItem(`timerState_${task.id}`);
-                if (savedState) {
+                savedState = localStorage.getItem(`timerState_${task.id}`);
+            } catch (error) {
+                console.error("Failed to read from localStorage", error);
+            }
+
+            if (savedState) {
+                try {
                     const { timeLeft: savedTimeLeft, isRunning: savedIsRunning } = JSON.parse(savedState);
-                    // only restore if it makes sense (e.g. not completed)
                     if (savedTimeLeft > 0) {
                       setTimeLeft(savedTimeLeft);
                       setIsRunning(savedIsRunning);
@@ -45,12 +50,12 @@ export function Timer({ task, onComplete, onSelectTask }: { task: Task | null; o
                       setTimeLeft(initialDurationSeconds);
                       setIsRunning(false);
                     }
-                } else {
+                } catch (error) {
+                    console.error("Failed to parse timer state from localStorage", error);
                     setTimeLeft(initialDurationSeconds);
                     setIsRunning(false);
                 }
-            } catch (error) {
-                console.error("Failed to load timer state from localStorage", error);
+            } else {
                 setTimeLeft(initialDurationSeconds);
                 setIsRunning(false);
             }
@@ -164,5 +169,3 @@ export function Timer({ task, onComplete, onSelectTask }: { task: Task | null; o
         </Card>
     );
 }
-
-    
