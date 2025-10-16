@@ -168,7 +168,7 @@ export default function Home() {
         </header>
 
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="flex justify-center items-start lg:order-last">
+          <div className="lg:order-last">
             <Timer task={currentTask} onComplete={handleTaskComplete} onSelectTask={handleSelectTask} />
           </div>
           <div className="w-full lg:order-first">
@@ -315,9 +315,12 @@ export default function Home() {
             </Tabs>
           </div>
         </main>
+        <footer className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
+          <p>
+            Developed by Manzoor | Visit <a href="https://manzoorseo.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">manzoorseo.com</a>
+          </p>
+        </footer>
       </div>
     </div>
   );
 }
-
-    
