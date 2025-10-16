@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
@@ -19,7 +20,7 @@ import { Slider } from "@/components/ui/slider";
 import { Timer } from "@/components/timer";
 import { StudyPlanGenerator } from "@/components/study-plan-generator";
 import { Logo } from "@/components/icons";
-import { BookOpen, History, ListTodo, Play, Plus } from "lucide-react";
+import { BookOpen, History, ListTodo, Play, Plus, Trash2, Pencil, Check as CheckIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Task = {
@@ -48,6 +49,9 @@ export default function Home() {
   const [isLoadingPlan, setIsLoadingPlan] = useState(false);
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const [editedTask, setEditedTask] = useState<Partial<Task>>({});
+
 
   useEffect(() => {
     setIsClient(true);
@@ -61,7 +65,7 @@ export default function Home() {
   const handlePlanGenerated = (plan: StudyPlanOutput["plan"]) => {
     const planWithState = plan.map((task, index) => ({
       ...task,
-      id: index,
+      id: Date.now() + index, // More robust ID
       completed: false,
     }));
     setStudyPlan(planWithState);
@@ -122,6 +126,39 @@ export default function Home() {
     }
   };
 
+  const handleDeleteTask = (taskId: number) => {
+    setStudyPlan(prevPlan => prevPlan ? prevPlan.filter(task => task.id !== taskId) : null);
+    if (currentTask && currentTask.id === taskId) {
+      setCurrentTask(null);
+    }
+    toast({
+      title: "Task Removed",
+      description: "The task has been deleted from your plan.",
+    });
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditedTask({ subject: task.subject, task: task.task });
+  };
+
+  const handleSaveEdit = (taskId: number) => {
+    setStudyPlan(prevPlan => 
+      prevPlan ? prevPlan.map(task =>
+        task.id === taskId ? { ...task, ...editedTask } : task
+      ) : null
+    );
+    if (currentTask && currentTask.id === taskId) {
+      setCurrentTask(prev => prev ? { ...prev, ...editedTask } : null);
+    }
+    setEditingTaskId(null);
+    setEditedTask({});
+    toast({
+      title: "Task Updated",
+      description: "Your changes have been saved.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
@@ -131,10 +168,10 @@ export default function Home() {
         </header>
 
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="flex justify-center items-start">
+          <div className="flex justify-center items-start lg:order-last">
             <Timer task={currentTask} onComplete={handleTaskComplete} onSelectTask={handleSelectTask} />
           </div>
-          <div className="w-full">
+          <div className="w-full lg:order-first">
             <Tabs defaultValue="ai-plan" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="ai-plan"><BookOpen className="w-4 h-4 mr-2" />AI Plan</TabsTrigger>
@@ -150,21 +187,39 @@ export default function Home() {
                       <CardTitle className="flex items-center gap-2"><ListTodo /> Your Study Plan</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ScrollArea className="h-64">
+                      <ScrollArea className="h-72">
                         <div className="space-y-4">
                           {studyPlan.map((item) => (
-                            <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${item.completed ? 'bg-accent/30' : 'bg-accent/50'}`}>
-                              <div className="flex items-start gap-4">
+                            <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${item.completed ? 'bg-accent/30' : 'bg-accent/50 hover:bg-accent/60'}`}>
+                              <div className="flex items-start gap-4 flex-grow">
                                 <Checkbox checked={item.completed} className="mt-1" onCheckedChange={() => handleSelectTask(item)} disabled={item.completed} />
                                 <div className="flex-grow">
-                                  <p className={`font-semibold ${item.completed ? 'line-through text-muted-foreground' : ''}`}>{item.subject}</p>
-                                  <p className="text-sm text-muted-foreground">{item.task}</p>
+                                  {editingTaskId === item.id ? (
+                                    <div className="flex flex-col gap-2">
+                                      <Input
+                                        value={editedTask.subject}
+                                        onChange={(e) => setEditedTask(prev => ({ ...prev, subject: e.target.value }))}
+                                        className="h-8 text-sm"
+                                      />
+                                      <Input
+                                        value={editedTask.task}
+                                        onChange={(e) => setEditedTask(prev => ({ ...prev, task: e.target.value }))}
+                                        className="h-8 text-xs"
+                                        placeholder="Task description..."
+                                      />
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <p className={`font-semibold ${item.completed ? 'line-through text-muted-foreground' : ''}`}>{item.subject}</p>
+                                      <p className="text-sm text-muted-foreground">{item.task}</p>
+                                    </>
+                                  )}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1">
                                 <div className="flex items-center gap-2 w-32">
                                   <Slider
-                                    defaultValue={[item.duration]}
+                                    value={[item.duration]}
                                     max={120}
                                     step={5}
                                     onValueChange={([value]) => handleDurationChange(item.id, value)}
@@ -173,9 +228,15 @@ export default function Home() {
                                   />
                                   <span className="text-sm font-normal text-muted-foreground w-12 text-right">{item.duration}m</span>
                                 </div>
-                                <Button size="sm" variant="ghost" onClick={() => handleSelectTask(item)} disabled={item.completed}>
-                                  <Play className="w-4 h-4" />
-                                </Button>
+                                {editingTaskId === item.id ? (
+                                    <Button size="icon" variant="ghost" onClick={() => handleSaveEdit(item.id)}><CheckIcon className="w-4 h-4 text-green-500"/></Button>
+                                ) : (
+                                    <>
+                                        <Button size="icon" variant="ghost" onClick={() => handleSelectTask(item)} disabled={item.completed}><Play className="w-4 h-4" /></Button>
+                                        <Button size="icon" variant="ghost" onClick={() => handleEditTask(item)} disabled={item.completed}><Pencil className="w-4 h-4"/></Button>
+                                        <Button size="icon" variant="ghost" onClick={() => handleDeleteTask(item.id)}><Trash2 className="w-4 h-4 text-destructive"/></Button>
+                                    </>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -258,4 +319,5 @@ export default function Home() {
     </div>
   );
 }
+
     
