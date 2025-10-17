@@ -287,54 +287,59 @@ export default function Home() {
                       <ScrollArea className="h-72">
                         <div className="space-y-4">
                           {studyPlan.map((item) => (
-                            <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${item.completed ? 'bg-accent/30' : 'bg-accent/40 hover:bg-accent/50'}`}>
-                              <div className="flex items-start gap-4 flex-grow">
-                                <Checkbox checked={item.completed} className="mt-1" onCheckedChange={() => handleSelectTask(item)} disabled={item.completed} />
-                                <div className="flex-grow">
-                                  {editingTaskId === item.id ? (
-                                    <div className="flex flex-col gap-2">
-                                      <Input
-                                        value={editedTask.subject}
-                                        onChange={(e) => setEditedTask(prev => ({ ...prev, subject: e.target.value }))}
-                                        className="h-8 text-sm"
-                                      />
-                                      <Input
-                                        value={editedTask.task}
-                                        onChange={(e) => setEditedTask(prev => ({ ...prev, task: e.target.value }))}
-                                        className="h-8 text-xs"
-                                        placeholder="Task description..."
-                                      />
+                            <div key={item.id} className={`p-3 rounded-lg transition-colors ${item.completed ? 'bg-accent/30' : 'bg-accent/40 hover:bg-accent/50'}`}>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                  <div className="flex items-start gap-4 flex-grow">
+                                    <Checkbox checked={item.completed} className="mt-1" onCheckedChange={() => handleSelectTask(item)} disabled={item.completed} />
+                                    <div className="flex-grow">
+                                      {editingTaskId === item.id ? (
+                                        <div className="flex flex-col gap-2">
+                                          <Input
+                                            value={editedTask.subject}
+                                            onChange={(e) => setEditedTask(prev => ({ ...prev, subject: e.target.value }))}
+                                            className="h-8 text-sm"
+                                          />
+                                          <Input
+                                            value={editedTask.task}
+                                            onChange={(e) => setEditedTask(prev => ({ ...prev, task: e.target.value }))}
+                                            className="h-8 text-xs"
+                                            placeholder="Task description..."
+                                          />
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <p className={`font-semibold ${item.completed ? 'line-through text-muted-foreground' : ''}`}>{item.subject}</p>
+                                          <p className="text-sm text-muted-foreground">{item.task}</p>
+                                        </>
+                                      )}
                                     </div>
-                                  ) : (
-                                    <>
-                                      <p className={`font-semibold ${item.completed ? 'line-through text-muted-foreground' : ''}`}>{item.subject}</p>
-                                      <p className="text-sm text-muted-foreground">{item.task}</p>
-                                    </>
-                                  )}
+                                  </div>
+
+                                  <div className="flex items-center gap-2 mt-3 sm:mt-0 sm:w-auto">
+                                    <div className="flex items-center gap-2 flex-grow sm:flex-grow-0 sm:w-32">
+                                      <Slider
+                                        value={[item.duration]}
+                                        max={120}
+                                        step={5}
+                                        onValueChange={([value]) => handleDurationChange(item.id, value)}
+                                        disabled={item.completed}
+                                        className="w-full"
+                                      />
+                                      <span className="text-sm font-normal text-muted-foreground w-12 text-right">{item.duration}m</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      {editingTaskId === item.id ? (
+                                          <Button size="icon" variant="ghost" onClick={() => handleSaveEdit(item.id)}><CheckIcon className="w-4 h-4 text-green-500"/></Button>
+                                      ) : (
+                                          <>
+                                              <Button size="icon" variant="ghost" onClick={() => handleSelectTask(item)} disabled={item.completed}><Play className="w-4 h-4" /></Button>
+                                              <Button size="icon" variant="ghost" onClick={() => handleEditTask(item)} disabled={item.completed}><Pencil className="w-4 h-4"/></Button>
+                                              <Button size="icon" variant="ghost" onClick={() => handleDeleteTask(item.id)}><Trash2 className="w-4 h-4 text-destructive"/></Button>
+                                          </>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <div className="flex items-center gap-2 w-32">
-                                  <Slider
-                                    value={[item.duration]}
-                                    max={120}
-                                    step={5}
-                                    onValueChange={([value]) => handleDurationChange(item.id, value)}
-                                    disabled={item.completed}
-                                    className="w-full"
-                                  />
-                                  <span className="text-sm font-normal text-muted-foreground w-12 text-right">{item.duration}m</span>
-                                </div>
-                                {editingTaskId === item.id ? (
-                                    <Button size="icon" variant="ghost" onClick={() => handleSaveEdit(item.id)}><CheckIcon className="w-4 h-4 text-green-500"/></Button>
-                                ) : (
-                                    <>
-                                        <Button size="icon" variant="ghost" onClick={() => handleSelectTask(item)} disabled={item.completed}><Play className="w-4 h-4" /></Button>
-                                        <Button size="icon" variant="ghost" onClick={() => handleEditTask(item)} disabled={item.completed}><Pencil className="w-4 h-4"/></Button>
-                                        <Button size="icon" variant="ghost" onClick={() => handleDeleteTask(item.id)}><Trash2 className="w-4 h-4 text-destructive"/></Button>
-                                    </>
-                                )}
-                              </div>
                             </div>
                           ))}
                         </div>
