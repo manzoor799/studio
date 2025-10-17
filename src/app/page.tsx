@@ -256,9 +256,11 @@ export default function Home() {
         </header>
 
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <div className="lg:order-2 flex flex-col gap-8">
+          <div className="flex flex-col gap-8 lg:order-2">
             <Timer task={currentTask} onComplete={handleTaskComplete} onSelectTask={handleSelectTask} />
-            <Chatbot />
+            <div className="hidden lg:block">
+              <Chatbot />
+            </div>
           </div>
           <div className="lg:order-1 w-full">
             <Tabs defaultValue="ai-plan" className="w-full">
@@ -408,6 +410,9 @@ export default function Home() {
                 </Card>
               </TabsContent>
             </Tabs>
+          </div>
+          <div className="lg:hidden col-span-1 mt-8">
+            <Chatbot />
           </div>
         </main>
         
