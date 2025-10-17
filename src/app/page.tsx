@@ -23,6 +23,7 @@ import { Chatbot } from "@/components/chatbot";
 import { Logo } from "@/components/icons";
 import { BookOpen, History, ListTodo, Play, Plus, Trash2, Pencil, Check as CheckIcon, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type Task = {
   id: number;
@@ -256,9 +257,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto p-4 sm:p-6 md:p-8">
-        <header className="flex items-center gap-3 mb-8">
-          <Logo className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold tracking-tight">StudyFlow</h1>
+        <header className="flex items-center justify-between gap-3 mb-8">
+          <div className="flex items-center gap-3">
+            <Logo className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold tracking-tight">StudyFlow</h1>
+          </div>
+          <ThemeToggle />
         </header>
 
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -404,7 +408,7 @@ export default function Home() {
                                   <p className="font-semibold">{entry.subject}</p>
                                   <p className="text-sm text-muted-foreground">{entry.task}</p>
                                 </div>
-                                <p className="text-sm text-muted-foreground">{entry.completedAt}</p>
+                                {isClient && <p className="text-sm text-muted-foreground">{entry.completedAt}</p>}
                               </div>
                               {index < sessionLog.length - 1 && <Separator className="mt-4" />}
                             </div>
@@ -422,7 +426,7 @@ export default function Home() {
               </TabsContent>
             </Tabs>
           </div>
-          <div className="lg:hidden col-span-1 mt-8">
+          <div className="lg:hidden col-span-1 mt-8 lg:mt-0">
             <Chatbot />
           </div>
         </main>
