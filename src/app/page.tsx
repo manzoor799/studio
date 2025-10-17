@@ -234,18 +234,24 @@ export default function Home() {
   const handleResetData = () => {
     if (studyPlan) {
         studyPlan.forEach(task => {
-            localStorage.removeItem(`timerState_${task.id}`);
+            if(isClient) localStorage.removeItem(`timerState_${task.id}`);
         });
     }
     setStudyPlan(null);
     setCurrentTask(null);
-    localStorage.removeItem('studyPlan');
-    localStorage.removeItem('currentTaskId');
+    if(isClient){
+      localStorage.removeItem('studyPlan');
+      localStorage.removeItem('currentTaskId');
+    }
     toast({
         title: "Study Plan Reset",
         description: "Your study plan has been cleared.",
     });
   };
+  
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -398,7 +404,7 @@ export default function Home() {
                                   <p className="font-semibold">{entry.subject}</p>
                                   <p className="text-sm text-muted-foreground">{entry.task}</p>
                                 </div>
-                                {isClient && <p className="text-sm text-muted-foreground">{entry.completedAt}</p>}
+                                <p className="text-sm text-muted-foreground">{entry.completedAt}</p>
                               </div>
                               {index < sessionLog.length - 1 && <Separator className="mt-4" />}
                             </div>
